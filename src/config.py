@@ -3,7 +3,7 @@ class DevelopmentConfig():
     MYSQL_HOST = 'localhost'
     MYSQL_USER = 'root'
     MYSQL_PASSWORD= ''
-    MYSQL_DB = 'api_flask'
+    MYSQL_DB = 'prefeco_db'
 
 
 
