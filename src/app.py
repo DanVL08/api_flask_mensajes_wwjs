@@ -35,6 +35,41 @@ def leer_alumno(matricula):
     except Exception as ex:
         return jsonify({'mensaje':"alumno no encontrado!"})  
 
+@app.route('/pagos/<matricula>', methods=['GET'])
+def consultar_pagos(matricula):
+    try:
+        cursor = conexion.connection.cursor()
+        
+        # Consultar el ID del alumno, nombre y apellido a partir de la matrícula
+        sql_id_alumno = "SELECT alumno_id, nombre, apellido1 FROM alumnos WHERE matricula = '{0}'".format(matricula)
+        cursor.execute(sql_id_alumno)
+        datos_id_alumno = cursor.fetchone()
+        
+        if datos_id_alumno is not None:
+            alumno_id = datos_id_alumno[0]
+            nombre = datos_id_alumno[1]
+            apellido1 = datos_id_alumno[2]
+            
+            # Consultar los pagos del alumno a partir de su ID
+            sql_pagos = "SELECT fecha_pago, monto, estado_pago FROM pagos WHERE alumno_id = '{0}'".format(alumno_id)
+            cursor.execute(sql_pagos)
+            datos_pagos = cursor.fetchall()
+            
+            # Crear lista de pagos
+            pagos = []
+            for pago in datos_pagos:
+                pagos.append({'fecha_pago': pago[0], 'monto': pago[1], 'estado_pago': pago[2]})
+            
+            # Crear objeto JSON de respuesta
+            respuesta = {'alumno_id': alumno_id, 'nombre': nombre, 'apellido1': apellido1, 'pagos': pagos}
+            return jsonify(respuesta)
+        
+        else:
+            return jsonify({'mensaje': "Alumno no encontrado"})
+    
+    except Exception as ex:
+        return jsonify({'mensaje': "Error al consultar los pagos del alumno"})
+
 #EN CASO QUE EL USUARIO ACCEDA A UNA RUTA NO ENCONTRADA
 def pagina_no_encontrada(error):
     return "<h1>La pagina que intentas buscar no existe...</h1>",404 #Devuelve el mensaje y ademas el codigo de error a la peticion http
