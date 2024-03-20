@@ -71,9 +71,9 @@ def consultar_pagos(matricula):
     except Exception as ex:
         return jsonify({'mensaje': "Error al consultar los pagos del alumno"})
 
-#YO QUERIA OBTENER LOS ALUMNOS SIN PAGO :(
-@app.route('/alumnos_con_pago_mes_actual', methods=['GET'])
-def alumnos_con_pago_mes_actual():
+
+@app.route('/pagos_mes_actual/<matricula>', methods=['GET'])
+def pagos_mes_actual(matricula):
     try:
         cursor = conexion.connection.cursor()
         
@@ -84,28 +84,27 @@ def alumnos_con_pago_mes_actual():
         ultimo_dia_mes_actual = primer_dia_mes_actual.replace(day=28) + datetime.timedelta(days=4)
         ultimo_dia_mes_actual = ultimo_dia_mes_actual - datetime.timedelta(days=ultimo_dia_mes_actual.day)
         
-        # Consultar los nombres de los alumnos que han realizado su pago este mes
+        # Consultar los pagos del alumno para el mes actual
         sql = """
-            SELECT DISTINCT alumnos.id, alumnos.nombre, alumnos.apellido1,
-            FROM alumnos
-            LEFT JOIN pagos ON alumnos.alumno_id = pagos.alumno_id
-            WHERE (pagos.fecha_pago IS NULL 
-            OR (pagos.fecha_pago >= '{0}' AND pagos.fecha_pago <= '{1}'))
-        """.format(primer_dia_mes_actual.strftime('%Y-%m-%d'), ultimo_dia_mes_actual.strftime('%Y-%m-%d'))
+            SELECT fecha_pago, monto, estado_pago
+            FROM pagos
+            WHERE alumno_id = (SELECT alumno_id FROM alumnos WHERE matricula = '{0}')
+            AND fecha_pago >= '{1}' AND fecha_pago <= '{2}'
+        """.format(matricula, primer_dia_mes_actual, ultimo_dia_mes_actual)
         
         cursor.execute(sql)
-        datos_alumnos = cursor.fetchall()
+        datos_pagos = cursor.fetchall()
         
-        # Crear lista de nombres de alumnos
-        nombres_alumnos = [{'nombre': alumno[0], 'apellido1': alumno[1]} for alumno in datos_alumnos]
+        # Crear lista de pagos del alumno
+        pagos = [{'fecha_pago': pago[0], 'monto': pago[1], 'estado_pago': pago[2]} for pago in datos_pagos]
         
         # Crear objeto JSON de respuesta
-        respuesta = {'alumnos_sin_pago_mes_actual': nombres_alumnos, 'mensaje': "Alumnos con pago este mes"}
+        respuesta = {'pagos_mes_actual': pagos, 'mensaje': f"Pagos del alumno con matrícula {matricula} para el mes actual"}
         return jsonify(respuesta)
 
     except Exception as ex:
-        return jsonify({'mensaje': "Error al consultar los alumnos sin pago"})
-    
+        return jsonify({'mensaje': "Error al consultar los pagos"})
+
 #EN CASO QUE EL USUARIO ACCEDA A UNA RUTA NO ENCONTRADA
 def pagina_no_encontrada(error):
     return "<h1>La pagina que intentas buscar no existe...</h1>",404 #Devuelve el mensaje y ademas el codigo de error a la peticion http
