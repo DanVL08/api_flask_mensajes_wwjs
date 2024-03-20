@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_mysqldb import MySQL
 from config import config
+import datetime
 app = Flask(__name__)
 
 conexion = MySQL(app)
@@ -70,6 +71,41 @@ def consultar_pagos(matricula):
     except Exception as ex:
         return jsonify({'mensaje': "Error al consultar los pagos del alumno"})
 
+#YO QUERIA OBTENER LOS ALUMNOS SIN PAGO :(
+@app.route('/alumnos_con_pago_mes_actual', methods=['GET'])
+def alumnos_con_pago_mes_actual():
+    try:
+        cursor = conexion.connection.cursor()
+        
+        # Obtener el primer día del mes actual
+        primer_dia_mes_actual = datetime.datetime.today().replace(day=1)
+        
+        # Obtener el último día del mes actual
+        ultimo_dia_mes_actual = primer_dia_mes_actual.replace(day=28) + datetime.timedelta(days=4)
+        ultimo_dia_mes_actual = ultimo_dia_mes_actual - datetime.timedelta(days=ultimo_dia_mes_actual.day)
+        
+        # Consultar los nombres de los alumnos que han realizado su pago este mes
+        sql = """
+            SELECT DISTINCT alumnos.id, alumnos.nombre, alumnos.apellido1,
+            FROM alumnos
+            LEFT JOIN pagos ON alumnos.alumno_id = pagos.alumno_id
+            WHERE (pagos.fecha_pago IS NULL 
+            OR (pagos.fecha_pago >= '{0}' AND pagos.fecha_pago <= '{1}'))
+        """.format(primer_dia_mes_actual.strftime('%Y-%m-%d'), ultimo_dia_mes_actual.strftime('%Y-%m-%d'))
+        
+        cursor.execute(sql)
+        datos_alumnos = cursor.fetchall()
+        
+        # Crear lista de nombres de alumnos
+        nombres_alumnos = [{'nombre': alumno[0], 'apellido1': alumno[1]} for alumno in datos_alumnos]
+        
+        # Crear objeto JSON de respuesta
+        respuesta = {'alumnos_sin_pago_mes_actual': nombres_alumnos, 'mensaje': "Alumnos con pago este mes"}
+        return jsonify(respuesta)
+
+    except Exception as ex:
+        return jsonify({'mensaje': "Error al consultar los alumnos sin pago"})
+    
 #EN CASO QUE EL USUARIO ACCEDA A UNA RUTA NO ENCONTRADA
 def pagina_no_encontrada(error):
     return "<h1>La pagina que intentas buscar no existe...</h1>",404 #Devuelve el mensaje y ademas el codigo de error a la peticion http
