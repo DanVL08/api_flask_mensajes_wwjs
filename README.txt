@@ -1,4 +1,4 @@
-Este archivo fue sacado del video
+
 https://youtu.be/D6LZnrDbQPM?si=HqaTVedOJQ4LnwTk
 
 PASOS:

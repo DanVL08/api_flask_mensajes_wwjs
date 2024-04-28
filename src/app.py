@@ -1,11 +1,49 @@
 from flask import Flask, jsonify, request
 from flask_mysqldb import MySQL
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 from config import config
 import datetime
 app = Flask(__name__)
-
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/prefeco_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 conexion = MySQL(app)
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
 
+class Alumnos(db.Model):
+    alumno_id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50))
+    apellido1 = db.Column(db.String(50))
+    apellido2 = db.Column(db.String(50))
+    fecha_nacimiento = db.Column(db.Date)
+    grado = db.Column(db.Integer)
+    grupo = db.Column(db.String(10))
+    matricula = db.Column(db.String(20))
+    direccion = db.Column(db.String(100))
+    telefono = db.Column(db.String(15))
+    
+class alumnoSchema(ma.Schema):
+    class Meta:
+        fields = ('alumno_id','nombre', 'apellido1','apellido2','fecha_nacimiento','grado','grupo','matricula','direccion','telefono')
+
+alumno_schema =  alumnoSchema()
+alumnos_schema =  alumnoSchema(many=True)
+
+@app.route('/alchemy-alumnos', methods=['GET'])
+def get_alumnos_con_alchemy():
+    all_alumnos = Alumnos.query.all()
+    resultados = alumnos_schema.dump(all_alumnos)
+    return jsonify({'alumnos':resultados})
+
+@app.route('/alchemy-alumnos/<matricula>', methods=['GET'])
+def leer_alumno_con_alchemy(matricula):
+    #alumno = Alumnos.query.get(alumno_id)
+    # get a user by username
+    alumno = Alumnos.query.filter_by(matricula=matricula).one_or_404()
+    respuesta = alumno_schema.dump(alumno)
+    return jsonify({'alumno':respuesta})
+#https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/legacy-query/ aqui es la posible solucion al error
 @app.route('/alumnos', methods=['GET'])
 def listar_alumnos():
     try:
