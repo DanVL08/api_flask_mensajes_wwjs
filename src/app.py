@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_mysqldb import MySQL
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
+from flask_marshmallow import Marshmallow, fields
 from config import config
 import datetime
 app = Flask(__name__)
@@ -11,7 +11,10 @@ conexion = MySQL(app)
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
+#MODELOS
 class Alumnos(db.Model):
+    __tablename__ = 'alumnos'
+
     alumno_id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50))
     apellido1 = db.Column(db.String(50))
@@ -22,7 +25,8 @@ class Alumnos(db.Model):
     matricula = db.Column(db.String(20))
     direccion = db.Column(db.String(100))
     telefono = db.Column(db.String(15))
-    
+    pagos = db.relationship('Pagos', backref='alumno')
+#NECESITAMOS DESCUBRIR EL TIPO DE DATO PARA MONTO
 class alumnoSchema(ma.Schema):
     class Meta:
         fields = ('alumno_id','nombre', 'apellido1','apellido2','fecha_nacimiento','grado','grupo','matricula','direccion','telefono')
@@ -30,7 +34,24 @@ class alumnoSchema(ma.Schema):
 alumno_schema =  alumnoSchema()
 alumnos_schema =  alumnoSchema(many=True)
 
-@app.route('/alchemy-alumnos', methods=['GET'])
+class Pagos(db.Model):
+    __tablename__ = 'pagos'
+    pago_id      = db.Column(db.Integer, primary_key=True)
+    alumno_id    = db.Column(db.Integer, db.ForeignKey('alumnos.alumno_id'))
+    matricula    = db.Column(db.String(20))
+    fecha_pago   = db.Column(db.Date)
+    monto        = db.Column(db.Numeric(10,2))
+    metodo_pago  = db.Column(db.String(20))
+    estado_pago  = db.Column(db.String(15))
+    concepto_pago= db.Column(db.String(50))
+class pagoSchema(ma.Schema):
+    class Meta:
+        fields = ('pago_id','alumno_id','matricula','fecha_pago','monto','metodo_pago','estado_pago','concepto_pago')#,'metodo_pago','estado_pago','concepto_pago
+
+pago_schema =  pagoSchema()
+pagos_schema =  pagoSchema(many=True)  
+
+@app.route('/alumnos', methods=['GET'])
 def get_alumnos_con_alchemy():
     all_alumnos = Alumnos.query.all()
     resultados = alumnos_schema.dump(all_alumnos)
@@ -38,49 +59,38 @@ def get_alumnos_con_alchemy():
 
 @app.route('/alchemy-alumnos/<matricula>', methods=['GET'])
 def leer_alumno_con_alchemy(matricula):
-    #alumno = Alumnos.query.get(alumno_id)
-    # get a user by username
-    alumno = Alumnos.query.filter_by(matricula=matricula).one_or_404()
-    respuesta = alumno_schema.dump(alumno)
-    return jsonify({'alumno':respuesta})
-#https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/legacy-query/ aqui es la posible solucion al error
-@app.route('/alumnos', methods=['GET'])
-def listar_alumnos():
     try:
-        cursor = conexion.connection.cursor()
-        sql = "SELECT nombre, apellido1, matricula, telefono FROM alumnos"
-        cursor.execute(sql)
-        datos = cursor.fetchall()
-        alumnos = []
-        #AGREGAR LOS DATOS DE LOS ALUMNOS A UN JSON
-        for fila in datos:
-            alumno = {'nombre':fila[0], 'apellido1':fila[1], 'matricula': fila[2],'telefono': fila[3]}
-            alumnos.append(alumno)
-        return jsonify({'alumnos':alumnos})
+        alumno = Alumnos.query.filter_by(matricula=matricula).one_or_404()
+        respuesta = alumno_schema.dump(alumno)
+        return jsonify({'alumno':respuesta})
     except Exception as ex:
-        return jsonify({'mensaje':"Error"})
+        return jsonify({'error':ex})
 
- #LEE UN SOLO ALUMNO Y LO MUESTRA    
-@app.route('/alumnos/<matricula>', methods=['GET'])
-def leer_alumno(matricula):
+#AHORA QUIERO OBTENER UN SOLO PAGO
+#FUENTE:https://www.youtube.com/watch?v=VVX7JIWx-ss
+@app.route('/pagos/<matricula>', methods=['GET'])
+def obtener_pagos(matricula):
     try:
-        cursor = conexion.connection.cursor()
-        sql = "SELECT nombre, apellido1, matricula FROM alumnos WHERE matricula = '{0}'".format(matricula)
-        cursor.execute(sql)
-        datos = cursor.fetchone()
-        if datos != None:
-            alumno = {'nombre':datos[0], 'apellido1':datos[1], 'matricula': datos[2]}
-            return jsonify({'alumno':alumno, 'mensaje':"alumno encontrado!"})
-    except Exception as ex:
-        return jsonify({'mensaje':"alumno no encontrado!"})  
+        alumno = Alumnos.query.filter_by(matricula=matricula).one_or_404()
+        alumno_respuesta = alumno_schema.dump(alumno)
+        pagos = Pagos.query.filter_by(matricula=matricula)
+        pagos_respuesta = pagos_schema.dump(pagos)
 
-@app.route('/alumnos_con_pago_mes_actual', methods=['GET'])
-def alumnos_con_pago_mes_actual():
+        respuesta_final = {
+           'alumno_id': alumno_respuesta['alumno_id'],
+           'nombre': alumno_respuesta['nombre'],
+           'apellido1': alumno_respuesta['apellido1'],
+            "pagos":pagos_respuesta
+        }
+        return jsonify(respuesta_final)
+    except Exception as ex:
+        return({'Ocurrio un error al consultar los datos del alumno': ex})
+
     try:
         cursor = conexion.connection.cursor()
         
         # Obtener el primer día del mes actual
-        primer_dia_mes_actual = datetime.datetime.today().replace(day=1)
+        primer_dia_mes_actual = datetime.datetime.today().replace(day=1).date()
         
         # Obtener el último día del mes actual
         ultimo_dia_mes_actual = primer_dia_mes_actual.replace(day=28) + datetime.timedelta(days=4)
@@ -105,42 +115,28 @@ def alumnos_con_pago_mes_actual():
         return jsonify(respuesta)
 
     except Exception as ex:
-        return jsonify({'mensaje': "Error al consultar las matrículas de alumnos con pago este mes"})
+        return jsonify({'mensaje': ex})
 
-@app.route('/pagos/<matricula>', methods=['GET'])
-def consultar_pagos(matricula):
-    try:
-        cursor = conexion.connection.cursor()
-        
-        # Consultar el ID del alumno, nombre y apellido a partir de la matrícula
-        sql_id_alumno = "SELECT alumno_id, nombre, apellido1 FROM alumnos WHERE matricula = '{0}'".format(matricula)
-        cursor.execute(sql_id_alumno)
-        datos_id_alumno = cursor.fetchone()
-        
-        if datos_id_alumno is not None:
-            alumno_id = datos_id_alumno[0]
-            nombre = datos_id_alumno[1]
-            apellido1 = datos_id_alumno[2]
-            
-            # Consultar los pagos del alumno a partir de su ID
-            sql_pagos = "SELECT fecha_pago, monto, estado_pago FROM pagos WHERE alumno_id = '{0}'".format(alumno_id)
-            cursor.execute(sql_pagos)
-            datos_pagos = cursor.fetchall()
-            
-            # Crear lista de pagos
-            pagos = []
-            for pago in datos_pagos:
-                pagos.append({'fecha_pago': pago[0], 'monto': pago[1], 'estado_pago': pago[2]})
-            
-            # Crear objeto JSON de respuesta
-            respuesta = {'alumno_id': alumno_id, 'nombre': nombre, 'apellido1': apellido1, 'pagos': pagos}
-            return jsonify(respuesta)
-        
-        else:
-            return jsonify({'mensaje': "Alumno no encontrado"})
+
+@app.route('/alumnos_con_pago_mes_actual', methods=['GET'])
+def matriculas_pago_mes_actual():
+    # Obtener el primer y último día del mes actual
     
-    except Exception as ex:
-        return jsonify({'mensaje': "Error al consultar los pagos del alumno"})
+    primer_dia_mes_actual = datetime.datetime.today().replace(day=1).date()
+    print("primer dia: ", primer_dia_mes_actual)
+    ultimo_dia_mes_actual = primer_dia_mes_actual.replace(day=28) + datetime.timedelta(days=4)
+    ultimo_dia_mes_actual = ultimo_dia_mes_actual - datetime.timedelta(days=ultimo_dia_mes_actual.day)
+
+    # Consulta SQLAlchemy equivalente
+    matriculas = db.session.query(Alumnos.matricula).join(Pagos, Alumnos.alumno_id == Pagos.alumno_id).filter(
+        Pagos.fecha_pago >= primer_dia_mes_actual,
+        Pagos.fecha_pago <= ultimo_dia_mes_actual
+    ).distinct().all()
+
+    # Convertir los resultados en una lista plana de matrículas
+    matriculas_list = [matricula[0] for matricula in matriculas]
+
+    return jsonify({"matriculas_con_pago_mes_actual": matriculas_list,'mensaje': "Matrículas de alumnos con pago este mes"})
 
 #EN CASO QUE EL USUARIO ACCEDA A UNA RUTA NO ENCONTRADA
 def pagina_no_encontrada(error):
