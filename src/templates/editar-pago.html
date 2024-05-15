@@ -1,0 +1,25 @@
+<!-- AQUI SE COLOCA LA PLANTILLA -->
+{% extends 'layout.html' %}
+
+{% block  body %}
+
+<div class="col-md-4 offset-md-4">
+    <div class="card card-body">
+        <form action="/update-pago/{{pago.pago_id}}" method="POST">
+            <h3 class="card-title">Editar pago</h3>
+            <!-- COLOCA LOS CAMPOS PARA ACTUALIZAR LOS DATOS ESTAN en el parametro pagos al renderizar el endpoint -->
+            <div class="form-group"><input type="text" class="form-control" name="matricula" placeholder="matricula" value="{{pago.matricula}}"></div>
+            <label for="telefono">Ingresa la fecha del pago:</label>
+            <div class="form-group"><input type="date" class="form-control" name="fecha_pago" placeholder="fecha de pago" value="{{pago.fecha_pago}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="monto" placeholder="monto" value="{{pago.monto}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="metodo_pago" placeholder="metodo_pago" value="{{pago.metodo_pago}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="estado_pago" placeholder="estado_pago" value="{{pago.estado_pago}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="concepto_pago" placeholder="concepto_pago" value="{{pago.concepto_pago}}"></div>
+                   
+            <button type="submit" class="btn btn-success btn-block">
+                Guardar
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock  %}

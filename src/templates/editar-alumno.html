@@ -1,0 +1,28 @@
+<!-- AQUI SE COLOCA LA PLANTILLA -->
+{% extends 'layout.html' %}
+
+{% block  body %}
+
+<div class="col-md-4 offset-md-4">
+    <div class="card card-body">
+        <h3 class="card-title">Editar alumno</h3>
+        <form action="/update-alumno/{{alumno.alumno_id}}" method="POST">
+            <!-- COLOCA LOS CAMPOS PARA ACTUALIZAR LOS DATOS ESTAN en el parametro alumno al renderizar el endpoint -->
+            <div class="form-group"><input type="text" class="form-control" name="nombres" placeholder="nombres" value="{{alumno.nombre}}"> </div>
+            <div class="form-group"><input type="text" class="form-control" name="apellido1" placeholder="apellido 1" value="{{alumno.apellido1}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="apellido2" placeholder="apellido 2" value="{{alumno.apellido2}}"></div>
+            <div class="form-group"><input type="date" class="form-control" name="fecha_nacimiento" placeholder="fecha de nacimiento" value="{{alumno.fecha_nacimiento}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="grado" maxlength="1" placeholder="grado" value="{{alumno.grado}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="grupo" maxlength="1" placeholder="grupo" value="{{alumno.grupo}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="matricula" placeholder="matricula" value="{{alumno.matricula}}"></div>
+            <div class="form-group"><input type="text" class="form-control" name="direccion" placeholder="direccion" value="{{alumno.direccion}}"></div>
+            <label for="telefono">Ingresa tu número de teléfono:</label>
+            <div class="form-group"><input type="tel"  class="form-control" name="telefono" pattern="[0-9]{3}[0-9]{3}[0-9]{4}" placeholder="###-###-####" required value="{{alumno.telefono}}"></div>
+        
+            <button type="submit" class="btn btn-success btn-block">
+                Guardar
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock  %}

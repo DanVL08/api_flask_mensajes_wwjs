@@ -1,0 +1,93 @@
+<!-- AQUI SE COLOCA LA PLANTILLA -->
+{%extends 'layout.html'%}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-3">
+         <!-- COL0CA LOS MENSAJES QUE SE ENVIEN A PARTIR DEL ENDPOINT -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{message}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="card card-body">
+            <h3 class="card-title">Registrar alumno nuevo</h3>
+            <form action="/add_alumno" method="POST">
+                 <!-- COLOCA LOS CAMPOS NECESARIOS PARA QUE EL USUARIO LLENE LOS REGISTROS el atributo name de las etiquetas sirve para obtener el valor desde el endpoint -->
+                <div class="form-group"><input type="text" class="form-control" name="nombres" placeholder="nombres" required>
+                </div>
+                <div class="form-group"><input type="text" class="form-control" name="apellido1"
+                        placeholder="apellido 1" required></div>
+                <div class="form-group"><input type="text" class="form-control" name="apellido2"
+                        placeholder="apellido 2" required></div>
+                        <label for="telefono">Ingresa la fecha de nacimiento:</label>
+                <div class="form-group"><input type="date" class="form-control" name="fecha_nacimiento"
+                        placeholder="fecha de nacimiento" required>
+                </div>
+                <div class="form-group"><input type="text" class="form-control" name="grado" maxlength="1"
+                        placeholder="grado"required></div>
+                <div class="form-group"><input type="text" class="form-control" name="grupo" maxlength="1"
+                        placeholder="grupo" required></div>
+                <div class="form-group"><input type="text" class="form-control" name="matricula"
+                        placeholder="matricula" required></div>
+                <div class="form-group"><input type="text" class="form-control" name="direccion"
+                        placeholder="direccion" required></div>
+                <label for="telefono">Ingresa tu número de teléfono:</label>
+                <div class="form-group"><input type="tel" class="form-control" name="telefono"
+                        pattern="[0-9]{3}[0-9]{3}[0-9]{4}" placeholder="###-###-####" required></div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <table class="table table-striped table-bordered bg-white table-sm">
+            <thead>
+                <tr>
+                    <td>Nombres</td>
+                    <td>Apellido 1</td>
+                    <td>Apellido 2</td>
+                    <td>Fecha de nacimiento</td>
+                    <td>Grado</td>
+                    <td>Grupo</td>
+                    <td>Matricula</td>
+                    <td>Direccion</td>
+                    <td>Teléfono</td>
+                    <td>Operaciones</td>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- LLENA LA TABLA CON EL PARAMETRO alumno QUE OBTIENE DEL ENDPOINT -->
+                {%for alumno in alumnos%}
+                <tr>
+                    <td>{{alumno.nombre}}</td>
+                    <td>{{alumno.apellido1}}</td>
+                    <td>{{alumno.apellido2}}</td>
+                    <td>{{alumno.fecha_nacimiento}}</td>
+                    <td>{{alumno.grado}}</td>
+                    <td>{{alumno.grupo}}</td>
+                    <td>{{alumno.matricula}}</td>
+                    <td>{{alumno.direccion}}</td>
+                    <td>{{alumno.telefono}}</td>
+                    <td>
+                        <a href="/edit-alumno/{{alumno.alumno_id}}" class="btn btn-secondary btn-sm">Editar</a>
+                        <a href="/delete-alumno/{{alumno.alumno_id}}" class="btn btn-danger btn-sm btn-delete">Borrar</a>
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
