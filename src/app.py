@@ -23,16 +23,53 @@ pagos_schema =  pagoSchema(many=True)
 def index():
     #SE OBTIENEN LOS DATOS DE LA BD Y SE RETORNAN PLASMADOS EN index.html
     try:
-        all_alumnos = Alumnos.query.all()
-        resultados = alumnos_schema.dump(all_alumnos)
-        return render_template('index.html', alumnos = resultados)
+        resultados = obtener_datos_de_alumnos()
+        datos_formulario = request.args.get('datos_formulario', None)
+        return render_template('index.html', alumnos = resultados, datos_formulario=datos_formulario)
     except Exception as e:
         flash(e)
         return redirect(url_for('index'))
 
+#FUNION PARA OBTENER LOS DATOS DE LOS ALUMNOS
+def obtener_datos_de_alumnos():
+    try:
+        all_alumnos = Alumnos.query.all()
+        resultados = alumnos_schema.dump(all_alumnos)
+        return resultados
+    except Exception as e:
+        flash(e)
+        return redirect(url_for('index'))
+    
 #RUTA PARA AÑADIR ALUMNOS NUEVOS
 @app.route('/add_alumno', methods=['POST'])
 def add_alumno():
+    if request.method == 'POST':
+        try:
+            alumno = Alumnos.query.filter_by(matricula=request.form['matricula']).first()
+            if not alumno:
+                alumno = Alumnos(
+                    nombre=request.form['nombres'],
+                    apellido1=request.form['apellido1'],
+                    apellido2=request.form['apellido2'],
+                    fecha_nacimiento=request.form['fecha_nacimiento'],
+                    grado=request.form['grado'],
+                    grupo=request.form['grupo'],
+                    matricula=request.form['matricula'],
+                    direccion=request.form['direccion'],
+                    telefono=request.form['telefono']
+                )
+                db.session.add(alumno)
+                db.session.commit()
+
+                flash('Alumno agregado satisfactoriamente')
+                return redirect(url_for('index'))
+            else:
+                flash(f"La matricula {alumno.matricula} ya está registrada en la base de datos")
+                alumnos = obtener_datos_de_alumnos()
+                return render_template('index.html', alumnos = alumnos, datos_formulario=request.form)
+        except Exception as e:
+            flash(e)
+            return redirect(url_for('index'))
     #SOLICITAR LOS DATOS DEL FORMULARIO DE index.html
     if request.method == 'POST':
         try:
@@ -216,8 +253,7 @@ def leer_alumno(matricula):
     except Exception as ex:
         return jsonify({'error':ex})
 
-#AHORA QUIERO OBTENER UN SOLO PAGO
-#FUENTE:https://www.youtube.com/watch?v=VVX7JIWx-ss
+
 @app.route('/pagos/<matricula>', methods=['GET'])
 def obtener_pagos(matricula):
     try:

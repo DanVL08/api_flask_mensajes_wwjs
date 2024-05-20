@@ -4,12 +4,12 @@
 {% block body %}
 <div class="row">
     <div class="col-md-3">
-         <!-- COL0CA LOS MENSAJES QUE SE ENVIEN A PARTIR DEL ENDPOINT -->
+        <!-- COLOCA LOS MENSAJES QUE SE ENVIEN A PARTIR DEL ENDPOINT -->
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         {% for message in messages %}
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{message}}
+            {{ message }}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -20,28 +20,36 @@
         <div class="card card-body">
             <h3 class="card-title">Registrar alumno nuevo</h3>
             <form action="/add_alumno" method="POST">
-                 <!-- COLOCA LOS CAMPOS NECESARIOS PARA QUE EL USUARIO LLENE LOS REGISTROS el atributo name de las etiquetas sirve para obtener el valor desde el endpoint -->
-                <div class="form-group"><input type="text" class="form-control" id="nombres" name="nombres" placeholder="nombres" required>
+                <!-- COLOCA LOS CAMPOS NECESARIOS PARA QUE EL USUARIO LLENE LOS REGISTROS el atributo name de las etiquetas sirve para obtener el valor desde el endpoint -->
+                <div class="form-group">
+                    <input type="text" class="form-control" id="nombres" name="nombres" placeholder="nombres" required value="{{ datos_formulario['nombres'] if datos_formulario else '' }}">
                 </div>
-                <div class="form-group"><input type="text" class="form-control" id="apellido1" name="apellido1"
-                        placeholder="apellido 1" required></div>
-                <div class="form-group"><input type="text" class="form-control" id="apellido2" name="apellido2"
-                        placeholder="apellido 2" required></div>
-                        <label for="telefono">Ingresa la fecha de nacimiento:</label>
-                <div class="form-group"><input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento"
-                        placeholder="fecha de nacimiento" required>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="apellido1" name="apellido1" placeholder="apellido 1" required value="{{ datos_formulario['apellido1'] if datos_formulario else '' }}">
                 </div>
-                <div class="form-group"><input type="text" class="form-control" id="grado" name="grado" maxlength="1"
-                        placeholder="grado"required></div>
-                <div class="form-group"><input type="text" class="form-control" id="grupo" name="grupo" maxlength="1"
-                        placeholder="grupo" required></div>
-                <div class="form-group"><input type="text" class="form-control" id="matricula" name="matricula"
-                        placeholder="matricula" required></div>
-                <div class="form-group"><input type="text" class="form-control" id="direccion" name="direccion"
-                        placeholder="direccion" required></div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="apellido2" name="apellido2" placeholder="apellido 2" required value="{{ datos_formulario['apellido2'] if datos_formulario else '' }}">
+                </div>
+                <label for="telefono">Ingresa la fecha de nacimiento:</label>
+                <div class="form-group">
+                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" placeholder="fecha de nacimiento" required value="{{ datos_formulario['fecha_nacimiento'] if datos_formulario else '' }}">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="grado" name="grado" maxlength="1" placeholder="grado" required value="{{ datos_formulario['grado'] if datos_formulario else '' }}">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="grupo" name="grupo" maxlength="1" placeholder="grupo" required value="{{ datos_formulario['grupo'] if datos_formulario else '' }}">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="matricula" name="matricula" placeholder="matricula" required value="{{ datos_formulario['matricula'] if datos_formulario else '' }}">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="direccion" name="direccion" placeholder="direccion" required value="{{ datos_formulario['direccion'] if datos_formulario else '' }}">
+                </div>
                 <label for="telefono">Ingresa tu número de teléfono:</label>
-                <div class="form-group"><input type="tel" class="form-control"  id="telefono" name="telefono"
-                        pattern="[0-9]{3}[0-9]{3}[0-9]{4}" placeholder="###-###-####" required></div>
+                <div class="form-group">
+                    <input type="tel" class="form-control" id="telefono" name="telefono" pattern="[0-9]{3}[0-9]{3}[0-9]{4}" placeholder="###-###-####" required value="{{ datos_formulario['telefono'] if datos_formulario else '' }}">
+                </div>
 
                 <div class="form-group">
                     <button id="Save" type="submit" class="btn btn-primary btn-block">
