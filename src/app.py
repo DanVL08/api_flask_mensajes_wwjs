@@ -18,6 +18,19 @@ alumnos_schema =  alumnoSchema(many=True)
 pago_schema =  pagoSchema()
 pagos_schema =  pagoSchema(many=True)
 #RUTAS DE VISTA DE USUARIO
+
+#RUTAS DE PRUEBA DE TABLAS
+#devuelve la ruta con la tabla
+@app.route('/tabla-alumnos')
+def tablas():
+    return render_template('tabla-alumnos.html', title='Alumnos')
+
+#devuelve la informacion de los alumnos
+@app.route('/api/data')
+def data():
+    print({'data': [alumno.to_dict() for alumno in Alumnos.query]})
+    return {'data': [alumno.to_dict() for alumno in Alumnos.query]}
+
 #RUTA INICIO, aparecerá la pantalla para mostrar o registrar alumnos
 @app.route('/')
 def index():
