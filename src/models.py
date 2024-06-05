@@ -17,6 +17,16 @@ class Alumnos(db.Model):
     direccion = db.Column(db.String(100))
     telefono = db.Column(db.String(15))
     pagos = db.relationship('Pagos', backref='alumno')
+    #De aqui obtngo el diccionario
+    def to_dict(self):
+        return {
+            'alumno_id':self.alumno_id,
+            'nombre': self.nombre,
+            'apellido1': self.apellido1,
+            'apellido2': self.apellido2,
+            'telefono': self.telefono,
+            'direccion': self.direccion
+        }
 
 class alumnoSchema(ma.Schema):
     class Meta:
