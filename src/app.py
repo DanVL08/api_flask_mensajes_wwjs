@@ -28,7 +28,6 @@ def tablas():
 #devuelve la informacion de los alumnos
 @app.route('/api/data')
 def data():
-    print({'data': [alumno.to_dict() for alumno in Alumnos.query]})
     return {'data': [alumno.to_dict() for alumno in Alumnos.query]}
 
 #RUTA INICIO, aparecerá la pantalla para mostrar o registrar alumnos

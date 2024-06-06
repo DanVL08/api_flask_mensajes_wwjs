@@ -7,6 +7,10 @@
             <th>Nombre</th>
             <th>Apellido1</th>
             <th>Apellido2</th>
+            <th>Fecha nacimiento</th>
+            <th>Grado</th>
+            <th>Grupo</th>
+            <th>Matricula</th>
             <th>Telefono</th>
             <th>Direccion</th>
             <th>Acciones</th>
@@ -26,6 +30,10 @@ $(document).ready(function () {
             {data: 'nombre'},
             {data: 'apellido1', searchable: true},
             {data: 'apellido2', orderable: false, searchable: false},
+            {data: 'fecha_nacimiento', orderable: false, searchable: false},
+            {data: 'grado', orderable: false, searchable: false},
+            {data: 'grupo', orderable: false, searchable: false},
+            {data: 'matricula', orderable: false, searchable: true},
             {data: 'telefono', orderable: false, searchable: false},
             {data: 'direccion'},
             {

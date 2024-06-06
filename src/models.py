@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from datetime import datetime
 db = SQLAlchemy()
 ma = Marshmallow()
 
@@ -24,8 +25,12 @@ class Alumnos(db.Model):
             'nombre': self.nombre,
             'apellido1': self.apellido1,
             'apellido2': self.apellido2,
-            'telefono': self.telefono,
-            'direccion': self.direccion
+            'fecha_nacimiento': self.fecha_nacimiento.strftime('%Y-%m-%d'),
+            'grado': self.grado,
+            'grupo': self.grupo,
+            'matricula': self.matricula,
+            'direccion': self.direccion,
+            'telefono': self.telefono
         }
 
 class alumnoSchema(ma.Schema):
