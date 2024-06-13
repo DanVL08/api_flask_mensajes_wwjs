@@ -47,6 +47,17 @@ class Pagos(db.Model):
     metodo_pago  = db.Column(db.String(20))
     estado_pago  = db.Column(db.String(15))
     concepto_pago= db.Column(db.String(50))
+
+    def to_dict(self):
+        return {
+            'pago_id':self.pago_id,
+            'matricula': self.matricula,
+            'fecha_pago': self.fecha_pago,
+            'monto': self.monto,
+            'metodo_pago': self.metodo_pago,
+            'estado_pago': self.estado_pago,
+            'concepto_pago': self.concepto_pago
+        }
 class pagoSchema(ma.Schema):
     class Meta:
         fields = ('pago_id','alumno_id','matricula','fecha_pago','monto','metodo_pago','estado_pago','concepto_pago')#,'metodo_pago','estado_pago','concepto_pago

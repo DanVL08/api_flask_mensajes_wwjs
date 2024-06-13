@@ -3,16 +3,15 @@
 
 {% block body %}
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-12">
         <!-- COLOCA LOS MENSAJES QUE SE ENVIEN A PARTIR DEL ENDPOINT -->
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         {% for message in messages %}
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{message}}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            {{ message }} <a href="/tabla-pagos">ver</a>
+            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true"></button>
+            
         </div>
         {% endfor %}
         {% endif %}
@@ -44,36 +43,4 @@
             </form>
         </div>
     </div>
-    <div class="col-md-9">
-        <table class="table table-striped table-bordered bg-white table-sm">
-            <thead>
-                <tr>
-                    <td>Matricula</td>
-                    <td>Fecha del pago </td>
-                    <td>Monto</td>
-                    <td>Metodo de pago</td>
-                    <td>Estado del pago</td>
-                    <td>Concepto del pago</td>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- LLENA LA TABLA CON EL PARAMETRO pago QUE OBTIENE DEL ENDPOINT -->
-                {%for pago in pagos%}
-                <tr>
-                    <td>{{pago.matricula}}</td>
-                    <td>{{pago.fecha_pago}}</td>
-                    <td>{{pago.monto}}</td>
-                    <td>{{pago.metodo_pago}}</td>
-                    <td>{{pago.estado_pago}}</td>
-                    <td>{{pago.concepto_pago}}</td>
-                    <td>
-                        <a href="/editar-pago/{{pago.pago_id}}" class="btn btn-secondary btn-sm">Editar</a>
-                        <a href="/borrar-pago/{{pago.pago_id}}" class="btn btn-danger btn-sm btn-delete">Borrar</a>
-                    </td>
-                </tr>
-                {%endfor%}
-            </tbody>
-        </table>
-    </div>
-</div>
 {% endblock %}

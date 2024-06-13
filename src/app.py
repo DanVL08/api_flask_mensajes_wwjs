@@ -19,17 +19,24 @@ pago_schema =  pagoSchema()
 pagos_schema =  pagoSchema(many=True)
 #RUTAS DE VISTA DE USUARIO
 
-#RUTAS DE PRUEBA DE TABLAS
+#RUTAS DE TABLAS
 #devuelve la ruta con la tabla
 @app.route('/tabla-alumnos')
-def tablas():
+def mostrar_tabla_alumnos():
     return render_template('tabla-alumnos.html', title='Alumnos')
 
+@app.route('/tabla-pagos')
+def mostrar_tabla_pagos():
+    return render_template('tabla-pagos.html', title ='Pagos')
+
 #devuelve la informacion de los alumnos
-@app.route('/api/data')
-def data():
+@app.route('/api/data/alumnos')
+def data_alumnos():
     return {'data': [alumno.to_dict() for alumno in Alumnos.query]}
 
+@app.route('/api/data/pagos')
+def data_pagos():
+    return {'data': [pagos.to_dict() for pagos in Pagos.query]}
 #RUTA INICIO, aparecerá la pantalla para mostrar o registrar alumnos
 @app.route('/')
 def index():
@@ -147,18 +154,24 @@ def update_alumno(id):
             return redirect(url_for('index'))
             
 #ELIMINA UN ALUMNO A APARTIR DE SI ID
-@app.route('/delete-alumno/<id>')
+@app.route('/delete-alumno/<int:id>', methods=['DELETE'])
 def delete_alumno(id):
     try:
-        alumno = Alumnos.query.filter_by(alumno_id = id).first()
-        db.session.delete(alumno)
-        db.session.commit()
-        flash('Alumno eliminado exitosamente')
-        return redirect(url_for('index'))
+        # Buscar el alumno por ID
+        alumno = Alumnos.query.filter_by(alumno_id=id).first()
+        
+        # Verificar si el alumno existe
+        if alumno:
+            db.session.delete(alumno)
+            db.session.commit()
+            return jsonify({"message": "Alumno eliminado exitosamente"}), 200
+        else:
+            return jsonify({"error": "Alumno no encontrado"}), 404
+    
     except Exception as e:
-        flash(e)
-        return redirect(url_for('index_pagos'))
-
+        # Loguear la excepción para depuración
+        app.logger.error(f"Error al eliminar el alumno: {str(e)}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 #RUTA INICIO, aparecerá la pantalla para mostrar o registrar pagos
 @app.route('/pagos')
 def index_pagos():
@@ -219,7 +232,6 @@ def update_pago(id):
     if request.method == 'POST':
         try:
             pago = Pagos.query.get(id)
-            print(pago.alumno_id)
             pago.matricula = request.form['matricula']
             pago.fecha_pago = request.form['fecha_pago']
             pago.monto = request.form['monto']
@@ -235,17 +247,24 @@ def update_pago(id):
             return redirect(url_for('index_pagos')) 
 
 #ELIMINA UN ALUMNO A APARTIR DE SI ID
-@app.route('/borrar-pago/<id>')
+@app.route('/borrar-pago/<int:id>', methods=['DELETE'])
 def delete_pago(id):
     try:
-        pago = Pagos.query.filter_by(pago_id = id).first()
-        db.session.delete(pago)
-        db.session.commit()
-        flash('Pago eliminado exitosamente')
-        return redirect(url_for('index_pagos'))
+        # Buscar el pago por ID
+        pago = Pagos.query.filter_by(pago_id=id).first()
+        
+        # Verificar si el pago existe
+        if pago:
+            db.session.delete(pago)
+            db.session.commit()
+            return jsonify({"message": "Pago eliminado exitosamente"}), 200
+        else:
+            return jsonify({"error": "Pago no encontrado"}), 404
+    
     except Exception as e:
-        flash(e)
-        return redirect(url_for('index_pagos'))
+        # Loguear la excepción para depuración
+        app.logger.error(f"Error al eliminar el pago: {str(e)}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 #######################################
 #ENDOPOINTS PARA CONSULTAR INFORMACIÓN#
 #######################################

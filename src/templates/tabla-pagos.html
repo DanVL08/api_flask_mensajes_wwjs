@@ -1,18 +1,14 @@
 {% extends "layout-tablas.html" %}
-
 {% block content %}
 <table id="data" class="table table-striped">
     <thead>
         <tr>
-            <th>Nombre</th>
-            <th>Apellido1</th>
-            <th>Apellido2</th>
-            <th>Fecha nacimiento</th>
-            <th>Grado</th>
-            <th>Grupo</th>
             <th>Matricula</th>
-            <th>Telefono</th>
-            <th>Direccion</th>
+            <th>Fecha de pago</th>
+            <th>Monto</th>
+            <th>Estado del pago</th>
+            <th>Método de pago</th>
+            <th>Concepto de pago</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -25,25 +21,22 @@
 <script>
     $(document).ready(function () {
         $('#data').DataTable({
-            ajax: '/api/data/alumnos',
+            ajax: '/api/data/pagos',
             columns: [
-                {data: 'nombre'},
-                {data: 'apellido1', searchable: true},
-                {data: 'apellido2', orderable: false, searchable: false},
-                {data: 'fecha_nacimiento', orderable: false, searchable: false},
-                {data: 'grado', orderable: false, searchable: false},
-                {data: 'grupo', orderable: false, searchable: false},
-                {data: 'matricula', orderable: false, searchable: true},
-                {data: 'telefono', orderable: false, searchable: false},
-                {data: 'direccion'},
+                { data: 'matricula' },
+                { data: 'fecha_pago', searchable: true },
+                { data: 'monto', orderable: false, searchable: false },
+                { data: 'estado_pago', orderable: false, searchable: false },
+                { data: 'metodo_pago', orderable: false, searchable: false },
+                { data: 'concepto_pago', orderable: false, searchable: false },
                 {
                     data: null,
                     orderable: false,
                     searchable: false,
                     render: function (data, type, row) {
                         return `
-                        <a href="/edit-alumno/${row.alumno_id}" class="btn btn-secondary btn-sm">Editar</a>
-                        <a href="#" class="btn-delete btn btn-danger btn-sm" data-id="${row.alumno_id}">Borrar</a>
+                        <a href="/editar-pago/${row.pago_id}" class="btn btn-secondary btn-sm">Editar</a>
+                        <a href="#" class="btn btn-danger btn-sm btn-delete" data-id="${row.pago_id}">Borrar</a>
                         `;
                     }
                 }
@@ -65,7 +58,7 @@
                             if (result.isConfirmed) {
                                 // Enviar la solicitud de eliminación al servidor
                                 $.ajax({
-                                    url: `/delete-alumno/${id}`,
+                                    url: `/borrar-pago/${id}`,
                                     type: 'DELETE',
                                     success: function (response) {
                                         Swal.fire(
@@ -105,4 +98,3 @@
     });
 </script>
 {% endblock %}
-
