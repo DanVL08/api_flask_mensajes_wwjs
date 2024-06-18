@@ -25,7 +25,7 @@ class Alumnos(db.Model):
             'nombre': self.nombre,
             'apellido1': self.apellido1,
             'apellido2': self.apellido2,
-            'fecha_nacimiento': self.fecha_nacimiento.strftime('%Y-%m-%d'),
+            'fecha_nacimiento': self.fecha_nacimiento.strftime('%d-%m-%Y'),
             'grado': self.grado,
             'grupo': self.grupo,
             'matricula': self.matricula,
@@ -52,7 +52,7 @@ class Pagos(db.Model):
         return {
             'pago_id':self.pago_id,
             'matricula': self.matricula,
-            'fecha_pago': self.fecha_pago,
+            'fecha_pago': self.fecha_pago.strftime('%d-%m-%Y'),
             'monto': self.monto,
             'metodo_pago': self.metodo_pago,
             'estado_pago': self.estado_pago,
