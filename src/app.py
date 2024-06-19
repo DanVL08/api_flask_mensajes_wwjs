@@ -2,12 +2,15 @@ from flask import Flask, jsonify, request, redirect, url_for, flash, render_temp
 from flask_mysqldb import MySQL
 from models import db, ma, Alumnos, Pagos, alumnoSchema, pagoSchema
 from config import config
+import os
 import datetime
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/prefeco_db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#settings
-app.secret_key = 'mysecretkey'
+# Configurar la aplicación usando las variables de entorno
+env_config = config['development']
+app.config.from_object(env_config)
+
+app.secret_key = os.getenv('SECRET_KEY', 'mysecretkey')
+# Inicializar la conexión a la base de datos
 conexion = MySQL(app)
 db.init_app(app)
 ma.init_app(app)
